@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAMBIO DIVISAS MONEDAS</title>
+</head>
+<body>
+    <h1>CAMBIO VALOR MONEDAS</h1>
+    <form id="frmConversion">
+        <label>Elige tu moneda actual</label><br/>
+        <select id="elegirDe"></select><br/>
+
+        <label>Elige la divisa que deseas</label><br/>
+        <select id="elegirDonde"></select><br/>
+
+        <label>Ingresa el valor a convertir</label><br/>
+        <input type="number" id="inpValor" placeholder="Valor"/><br/>
+
+        <button type="button" onclick="realizarCambio()">Convertir</button><br/>
+
+        <label>Resultado</label><br/>
+        <input type="number" id="inpResult" placeholder="Resultado" disabled/>
+    </form>
+    <script>
+        const host = 'api.frankfurter.app';
+
+        function cargarMonedas() {
+            fetch(`https://${host}/currencies`)
+                .then(resp => resp.json())
+                .then((data) => {
+                    const elegirDe = document.querySelector("#elegirDe");
+                    const elegirDonde = document.querySelector("#elegirDonde");
+
+                    Object.keys(data).forEach(key => {
+                        const option = document.createElement("option");
+                        option.value = key;
+                        option.textContent = `${data[key]} - [${key}]`;
+
+                        elegirDe.appendChild(option.cloneNode(true));
+                        elegirDonde.appendChild(option.cloneNode(true));
+                    });
+                });
+        }
+
+        function realizarCambio() {
+            const valor = parseFloat(document.querySelector("#inpValor").value);
+            const fromCurrency = document.querySelector("#elegirDe").value;
+            const toCurrency = document.querySelector("#elegirDonde").value;
+            const inpResultado = document.querySelector("#inpResult");
+            
+            if (!isNaN(valor)) {
+                fetch(`https://${host}/latest?amount=${valor}&from=${fromCurrency}&to=${toCurrency}`)
+                    .then(resp => resp.json())
+                    .then((data) => {
+                        inpResultado.value = data.rates[toCurrency];
+                    });
+            } else {
+                inpResultado.value = "";
+            }
+        }
+
+        cargarMonedas();
+    </script>
+</body>
+</html>
